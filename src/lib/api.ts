@@ -12,22 +12,41 @@ export type LeaderboardRow = {
   unrealizedPnlUsd: number;
 };
 
+const NGROK_HEADERS = {
+  "ngrok-skip-browser-warning": "true",
+};
+
 export async function importWallet(wallet: string, nickname: string, inviteCode: string) {
   const res = await fetch(`${BASE}/api/import`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      accept: "application/json",
+      ...NGROK_HEADERS,
+    },
     body: JSON.stringify({ wallet, nickname, inviteCode }),
   });
-  if (!res.ok) throw new Error(await res.text());
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
   return res.json();
 }
 
 export async function fetchLeaderboard(timeframe: Timeframe) {
-  const res = await fetch(`${BASE}/api/leaderboard?timeframe=${timeframe}`);
-  if (!res.ok) throw new Error(await res.text());
-  return res.json() as Promise<{
-    timeframe: Timeframe;
-    updatedAt: number;
-    rows: LeaderboardRow[];
-  }>;
+  const res = await fetch(`${BASE}/api/leaderboard?timeframe=${timeframe}`, {
+    headers: {
+      accept: "application/json",
+      ...NGROK_HEADERS,
+    },
+  });
+
+  if (!res.ok) {
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
+  }
+
+  return res.json() as Promise<{ timeframe: Timeframe; updatedAt: number; rows: LeaderboardRow[] }>;
 }
