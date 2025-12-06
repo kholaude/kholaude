@@ -1,33 +1,42 @@
+const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+
 export type Timeframe = "1w" | "1m" | "1y";
 
 export type WalletRow = {
   wallet: string;
-  startBalanceEth: string;
-  currentBalanceEth: string;
-  pnlEth: string;
+
+  // старые поля могли остаться для совместимости
+  startBalanceEth?: string;
+  currentBalanceEth?: string;
+  pnlEth?: string;
+
+  // новые поля для Polymarket-режима
+  pnlUsd?: string;
+  holdingsUsd?: string | null;
+  openCashPnlUsd?: string | null;
+  unit?: "USD";
 };
 
-export type AnalyzeResponse = {
+export type PnlResponse = {
   timeframe: Timeframe;
-  updatedAt: string;
-  startBlock: number;
-  latestBlock: number;
+  startTs?: number;
+  nowTs?: number;
+  unit?: "USD";
   rows: WalletRow[];
+  note?: string;
 };
 
-const BASE = import.meta.env.VITE_BACKEND_URL ?? "http://localhost:8080";
-
-export async function analyzeWallets(wallets: string[], timeframe: Timeframe) {
-  const res = await fetch(`${BASE}/api/analyze`, {
+export async function fetchPnl(wallets: string[], timeframe: Timeframe): Promise<PnlResponse> {
+  const res = await fetch(`${BASE}/api/pnl`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ wallets, timeframe })
+    body: JSON.stringify({ wallets, timeframe }),
   });
 
   if (!res.ok) {
-    const t = await res.text();
-    throw new Error(t || "API error");
+    const text = await res.text().catch(() => "");
+    throw new Error(text || `HTTP ${res.status}`);
   }
 
-  return (await res.json()) as AnalyzeResponse;
+  return res.json();
 }
