@@ -24,8 +24,9 @@ export default function ImportPage({ timeframe, setTimeframe }: Props) {
 
   async function run() {
     setLog("");
+
     if (!wallets.length) return setLog("Вставь хотя бы один адрес.");
-    if (!nickname.trim()) return setLog("Введи никнейм для регистрации.");
+    if (!nickname.trim()) return setLog("Введи никнейм участника.");
     if (!invite.trim()) return setLog("Введи код-приглашение.");
 
     setLoading(true);
@@ -58,19 +59,25 @@ export default function ImportPage({ timeframe, setTimeframe }: Props) {
           <div className="flex gap-2 bg-white/5 p-1 rounded-xl">
             <button
               onClick={() => setTimeframe("1d")}
-              className={`px-3 py-1.5 rounded-lg text-sm ${timeframe === "1d" ? "bg-white text-black" : "text-white/70"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm ${
+                timeframe === "1d" ? "bg-white text-black" : "text-white/70"
+              }`}
             >
               1 день
             </button>
             <button
               onClick={() => setTimeframe("1w")}
-              className={`px-3 py-1.5 rounded-lg text-sm ${timeframe === "1w" ? "bg-white text-black" : "text-white/70"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm ${
+                timeframe === "1w" ? "bg-white text-black" : "text-white/70"
+              }`}
             >
               1 нед
             </button>
             <button
               onClick={() => setTimeframe("1m")}
-              className={`px-3 py-1.5 rounded-lg text-sm ${timeframe === "1m" ? "bg-white text-black" : "text-white/70"}`}
+              className={`px-3 py-1.5 rounded-lg text-sm ${
+                timeframe === "1m" ? "bg-white text-black" : "text-white/70"
+              }`}
             >
               1 мес
             </button>
@@ -79,7 +86,10 @@ export default function ImportPage({ timeframe, setTimeframe }: Props) {
 
         <div className="grid md:grid-cols-2 gap-6">
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <div className="text-lg font-medium mb-3">Кошельки (по одному в строке)</div>
+            <div className="text-lg font-medium mb-3">
+              Кошельки (по одному в строке)
+            </div>
+
             <textarea
               value={text}
               onChange={e => setText(e.target.value)}
@@ -131,10 +141,10 @@ export default function ImportPage({ timeframe, setTimeframe }: Props) {
           </div>
 
           <div className="rounded-2xl border border-white/10 bg-white/[0.03] p-5">
-            <div className="text-lg font-medium mb-2">Как это работает</div>
+            <div className="text-lg font-medium mb-2">Подсказка</div>
             <div className="text-sm text-white/60">
-              Кошельки сохраняются на сервере и будут видны всем в лидерборде. Метрики на главной
-              обновляются каждые 5 минут.
+              Если бек у тебя за ngrok, этот импорт использует специальный заголовок,
+              который отключает ngrok-страницу предупреждения.
             </div>
           </div>
         </div>
