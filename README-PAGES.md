@@ -1,4 +1,1 @@
-# Frontend for GitHub Pages
-
-Содержимое этой папки можно залить как корень репозитория
-
+AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA
