@@ -104,3 +104,62 @@ export default function LeaderboardPage({ timeframe, setTimeframe }: Props) {
                   <tr className="border-b border-white/10">
                     <th className="text-left px-5 py-3 w-16">#</th>
                     <th className="text-left px-5 py-3 w-28">Δ топа</th>
+                    <th className="text-left px-5 py-3">Username</th>
+                    <th className="text-right px-5 py-3">Баланс</th>
+                    <th className="text-right px-5 py-3">P&L</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {rows.map((r, idx) => {
+                    const rank = idx + 1;
+                    const delta = rankChange(r.wallet, rank);
+                    const pnl = Number(r.pnlUsd);
+                    const hold = r.holdingsUsd == null ? null : Number(r.holdingsUsd);
+
+                    return (
+                      <tr key={r.wallet} className="border-b border-white/5 hover:bg-white/[0.03]">
+                        <td className="px-5 py-3 tabular-nums">{rank}</td>
+                        <td className="px-5 py-3 tabular-nums">
+                          <span
+                            className={
+                              delta.startsWith("+")
+                                ? "text-emerald-300"
+                                : delta.startsWith("-")
+                                ? "text-red-300"
+                                : "text-white/50"
+                            }
+                          >
+                            {delta}
+                          </span>
+                        </td>
+                        <td className="px-5 py-3">
+                          <a
+                            href={profileUrl(r.wallet)}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="text-white hover:underline"
+                          >
+                            {r.wallet}
+                          </a>
+                        </td>
+                        <td className="px-5 py-3 text-right tabular-nums">
+                          {hold == null ? "—" : `$${hold.toFixed(2)}`}
+                        </td>
+                        <td className="px-5 py-3 text-right tabular-nums">
+                          <span className={pnl >= 0 ? "text-emerald-300" : "text-red-300"}>
+                            {pnl >= 0 ? "+" : ""}
+                            ${pnl.toFixed(2)}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
