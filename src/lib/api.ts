@@ -1,42 +1,29 @@
-const BASE = import.meta.env.VITE_BACKEND_URL || "http://localhost:8080";
+const BASE = import.meta.env.VITE_BACKEND_URL;
 
-export type Timeframe = "1w" | "1m" | "1y";
+export type Timeframe = "1d" | "1w" | "1m";
 
-export type WalletRow = {
+export type LeaderboardRow = {
   wallet: string;
-
-  // старые поля могли остаться для совместимости
-  startBalanceEth?: string;
-  currentBalanceEth?: string;
-  pnlEth?: string;
-
-  // новые поля для Polymarket-режима
-  pnlUsd?: string;
-  holdingsUsd?: string | null;
-  openCashPnlUsd?: string | null;
-  unit?: "USD";
+  nickname: string;
+  polyUsername: string | null;
+  profileUrl: string;
+  balanceUsd: number | null;
+  realizedPnlUsd: number;
+  unrealizedPnlUsd: number;
 };
 
-export type PnlResponse = {
-  timeframe: Timeframe;
-  startTs?: number;
-  nowTs?: number;
-  unit?: "USD";
-  rows: WalletRow[];
-  note?: string;
-};
-
-export async function fetchPnl(wallets: string[], timeframe: Timeframe): Promise<PnlResponse> {
-  const res = await fetch(`${BASE}/api/pnl`, {
+export async function importWallet(wallet: string, nickname: string, inviteCode: string) {
+  const res = await fetch(`${BASE}/api/import`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ wallets, timeframe }),
+    body: JSON.stringify({ wallet, nickname, inviteCode }),
   });
-
-  if (!res.ok) {
-    const text = await res.text().catch(() => "");
-    throw new Error(text || `HTTP ${res.status}`);
-  }
-
+  if (!res.ok) throw new Error(await res.text());
   return res.json();
+}
+
+export async function fetchLeaderboard(timeframe: Timeframe) {
+  const res = await fetch(`${BASE}/api/leaderboard?timeframe=${timeframe}`);
+  if (!res.ok) throw new Error(await res.text());
+  return res.json() as Promise<{ timeframe: Timeframe; updatedAt: number; rows: LeaderboardRow[] }>;
 }
