@@ -25,5 +25,9 @@ export async function importWallet(wallet: string, nickname: string, inviteCode:
 export async function fetchLeaderboard(timeframe: Timeframe) {
   const res = await fetch(`${BASE}/api/leaderboard?timeframe=${timeframe}`);
   if (!res.ok) throw new Error(await res.text());
-  return res.json() as Promise<{ timeframe: Timeframe; updatedAt: number; rows: LeaderboardRow[] }>;
+  return res.json() as Promise<{
+    timeframe: Timeframe;
+    updatedAt: number;
+    rows: LeaderboardRow[];
+  }>;
 }
