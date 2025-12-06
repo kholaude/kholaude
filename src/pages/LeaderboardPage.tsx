@@ -1,57 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-
-export type Timeframe = "1d" | "1w" | "1m";
-
-export type LeaderboardRow = {
-  wallet: string;
-  nickname: string;
-  polyUsername: string | null;
-  profileUrl: string;
-
-  balanceUsd: number | null;
-  realizedPnlUsd: number;
-  unrealizedPnlUsd: number;
-};
-
-type LeaderboardResponse = {
-  timeframe: Timeframe;
-  updatedAt: number;
-  rows: LeaderboardRow[];
-};
-
-const BASE: string = import.meta.env.VITE_BACKEND_URL;
-
-async function fetchLeaderboardSafe(timeframe: Timeframe): Promise<LeaderboardResponse> {
-  if (!BASE) {
-    throw new Error("VITE_BACKEND_URL не задан при сборке фронта.");
-  }
-
-  const url = `${BASE}/api/leaderboard?timeframe=${timeframe}`;
-  const res = await fetch(url, {
-    headers: { accept: "application/json" },
-  });
-
-  const contentType = res.headers.get("content-type") || "";
-
-  if (!res.ok) {
-    const text = await res.text();
-    throw new Error(
-      `HTTP ${res.status} при запросе leaderboard. URL: ${url}. Ответ: ${text.slice(0, 200)}`
-    );
-  }
-
-  if (!contentType.includes("application/json")) {
-    const text = await res.text();
-    throw new Error(
-      `Ожидали JSON, получили "${contentType || "unknown"}". URL: ${url}. Ответ: ${text.slice(
-        0,
-        200
-      )}`
-    );
-  }
-
-  return res.json();
-}
+import { fetchLeaderboard, type LeaderboardRow, type Timeframe } from "../lib/api";
 
 type Props = {
   timeframe: Timeframe;
@@ -62,15 +10,14 @@ export default function LeaderboardPage({ timeframe, setTimeframe }: Props) {
   const [rows, setRows] = useState<LeaderboardRow[]>([]);
   const [updatedAt, setUpdatedAt] = useState<number | null>(null);
   const [err, setErr] = useState<string | null>(null);
-  const [loading, setLoading] = useState<boolean>(false);
+  const [loading, setLoading] = useState(false);
 
   async function load() {
     try {
       setLoading(true);
       setErr(null);
 
-      const data = await fetchLeaderboardSafe(timeframe);
-
+      const data = await fetchLeaderboard(timeframe);
       setRows(Array.isArray(data.rows) ? data.rows : []);
       setUpdatedAt(data.updatedAt ?? Date.now());
     } catch (e: any) {
@@ -137,7 +84,11 @@ export default function LeaderboardPage({ timeframe, setTimeframe }: Props) {
           <div className="px-5 py-4 border-b border-white/10 flex items-center justify-between">
             <div className="text-lg font-medium">Leaderboard</div>
             <div className="text-xs text-white/50">
-              {loading ? "загрузка..." : sorted.length ? `${sorted.length} участников` : "нет данных"}
+              {loading
+                ? "загрузка..."
+                : sorted.length
+                ? `${sorted.length} участников`
+                : "нет данных"}
             </div>
           </div>
 
@@ -173,9 +124,11 @@ export default function LeaderboardPage({ timeframe, setTimeframe }: Props) {
                     const bal = r.balanceUsd;
 
                     const polymarketLabel = r.polyUsername ? `@${r.polyUsername}` : r.wallet;
-                    const url = r.profileUrl || (r.polyUsername
-                      ? `https://polymarket.com/@${r.polyUsername}`
-                      : `https://polymarket.com/profile/${r.wallet}`);
+                    const url =
+                      r.profileUrl ||
+                      (r.polyUsername
+                        ? `https://polymarket.com/@${r.polyUsername}`
+                        : `https://polymarket.com/profile/${r.wallet}`);
 
                     return (
                       <tr
